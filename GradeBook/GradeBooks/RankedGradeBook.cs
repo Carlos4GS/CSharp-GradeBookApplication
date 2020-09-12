@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using GradeBook.Enums;
 
 namespace GradeBook.GradeBooks
@@ -8,6 +9,30 @@ namespace GradeBook.GradeBooks
         public RankedGradeBook(string name) : base(name)
         {
             this.Type = GradeBookType.Ranked;
+        }
+
+        public override char GetLetterGrade(double averageGrade)
+        {
+            if (Students.Count < 5)
+                throw new InvalidOperationException("Ranked-grading requires a minimum of 5 students to work");
+
+            var orderedGrades = Students.
+                                    OrderByDescending(s => s.AverageGrade).
+                                    Select(s => s.AverageGrade).
+                                    ToList();
+
+            var threshold20 = (int)Math.Ceiling(Students.Count * 0.2);
+
+            if (orderedGrades[threshold20 - 1] <= averageGrade)
+                return 'A';
+            if (orderedGrades[threshold20 * 2 - 1] <= averageGrade)
+                return 'B';
+            if (orderedGrades[threshold20 * 3 - 1] <= averageGrade)
+                return 'C';
+            if (orderedGrades[threshold20 * 4 - 1] <= averageGrade)
+                return 'D';
+
+            return 'F';
         }
     }
 }
